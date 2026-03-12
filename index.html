@@ -1,0 +1,2725 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>代購後台管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Heroicons inline SVG styling */
+      .icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        display: inline-block;
+      }
+      .icon-lg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+      .icon-xl {
+        width: 1.75rem;
+        height: 1.75rem;
+      }
+    </style>
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        background: #f8f9fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      .status-pending {
+        background: #fff4e6;
+        color: #e67700;
+      }
+      .status-purchased {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .status-completed {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status-active {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status-sold_out {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+      }
+
+      .card:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background: #2b2b2b;
+        color: white;
+        border-radius: 16px;
+        padding: 14px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .btn-primary:active {
+        transform: scale(0.96);
+        background: #1a1a1a;
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #2b2b2b;
+        border-radius: 16px;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2b2b2b;
+        color: white;
+        font-size: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-icon:active {
+        transform: scale(0.9);
+      }
+
+      .product-img {
+        border-radius: 20px;
+        object-fit: cover;
+      }
+
+      .tab-btn {
+        position: relative;
+        padding: 12px 20px;
+        color: #9e9e9e;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .tab-btn.active {
+        color: #2b2b2b;
+      }
+
+      .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 3px;
+        background: #2b2b2b;
+        border-radius: 2px;
+      }
+
+      .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #2b2b2b;
+        padding: 12px 16px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        border-radius: 32px 32px 0 0;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        color: #9e9e9e;
+      }
+
+      .nav-item.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
+      .nav-icon {
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .nav-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+      }
+
+      .view-toggle {
+        background: #f5f5f5;
+        border-radius: 14px;
+        padding: 4px;
+        display: inline-flex;
+        gap: 4px;
+      }
+
+      .view-toggle button {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #757575;
+      }
+
+      .view-toggle button.active {
+        background: white;
+        color: #2b2b2b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .order-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        margin-bottom: 16px;
+      }
+
+      .order-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
+        padding: 20px;
+      }
+
+      .product-item {
+        background: #fafafa;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+
+      input,
+      select {
+        border-radius: 12px;
+        border: 2px solid #f0f0f0;
+        padding: 16px 20px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #2b2b2b;
+      }
+
+      .search-box {
+        position: relative;
+      }
+
+      .search-box input {
+        padding-left: 44px;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #9e9e9e;
+      }
+
+      .image-upload-preview {
+        width: 100%;
+        max-height: 150px;
+        object-fit: contain;
+        border-radius: 12px;
+        margin-top: 12px;
+        display: block;
+      }
+
+      .search-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 100px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .search-modal.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .search-modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+      }
+
+      .search-modal.active .search-modal-content {
+        transform: translateY(0);
+      }
+
+      .search-input-wrapper {
+        position: relative;
+        margin-bottom: 12px;
+      }
+
+      .search-input-wrapper input {
+        width: 100%;
+        padding: 16px 50px 16px 50px;
+        border: 2px solid #f0f0f0;
+        border-radius: 16px;
+        font-size: 16px;
+      }
+
+      .search-input-wrapper input:focus {
+        border-color: #2b2b2b;
+        outline: none;
+      }
+
+      .search-input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+      }
+
+      .search-close-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #f5f5f5;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .search-close-btn:hover {
+        background: #e0e0e0;
+      }
+
+      .search-result-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #2b2b2b;
+        color: white;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+
+      .search-result-badge button {
+        margin-left: 8px;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      /* 隱藏捲軸但保持滾動功能 */
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* 手風琴樣式 */
+      .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+
+      .accordion-content.active {
+        max-height: 3000px;
+        transition: max-height 0.5s ease-in;
+      }
+
+      .accordion-toggle {
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .accordion-toggle:active {
+        transform: scale(0.98);
+      }
+
+      .accordion-icon {
+        transition: transform 0.3s ease;
+      }
+
+      .accordion-icon.rotated {
+        transform: rotate(180deg);
+      }
+    </style>
+  </head>
+  <body class="pb-32">
+    <!-- 頂部標題欄（簡化版） -->
+    <div
+      class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 border-b border-gray-100"
+    >
+      <div class="max-w-7xl mx-auto px-5 py-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900" id="page-title">
+              儀表板
+            </h1>
+          </div>
+          <button
+            onclick="resetData()"
+            class="text-xs text-gray-400 hover:text-gray-600"
+          >
+            重置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主要內容 -->
+    <div class="max-w-7xl mx-auto px-5 py-6">
+      <!-- 儀表板 -->
+      <div id="dashboard" class="tab-content active">
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <div class="stat-card text-center">
+            <div class="text-xs text-gray-500 mb-2">今日訂單</div>
+            <div class="text-2xl font-bold text-gray-900" id="stat-orders">
+              0
+            </div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-xs text-gray-500 mb-2">營收</div>
+            <div class="text-lg font-bold text-green-600" id="stat-revenue">
+              $0
+            </div>
+          </div>
+          <div class="stat-card text-center">
+            <div class="text-xs text-gray-500 mb-2">待處理</div>
+            <div class="text-2xl font-bold text-orange-500" id="stat-pending">
+              0
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h2 class="font-bold text-gray-900 mb-4">最近訂單</h2>
+          <div id="recent-orders" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- 商品管理 -->
+      <div id="products" class="tab-content">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+            <div class="view-toggle">
+              <button
+                onclick="toggleProductView('card')"
+                class="active"
+                id="view-card"
+              >
+                卡片
+              </button>
+              <button onclick="toggleProductView('list')" id="view-list">
+                列表
+              </button>
+            </div>
+            <button onclick="openSearchModal()" class="btn-icon">
+              <svg
+                class="icon-lg"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </button>
+          </div>
+          <button onclick="showAddProductModal()" class="btn-icon">
+            <svg
+              class="icon-xl"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 搜尋結果標記 -->
+        <div id="search-result-info" class="hidden mb-4">
+          <span class="search-result-badge">
+            搜尋：「<span id="search-keyword-display"></span>」
+            <button onclick="clearSearch()">
+              <svg
+                class="icon inline"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+
+        <div id="products-card-view" class="grid grid-cols-2 gap-4"></div>
+        <div id="products-list-view" class="hidden space-y-3"></div>
+      </div>
+
+      <!-- 訂單管理 -->
+      <div id="orders" class="tab-content">
+        <!-- 分組切換和搜尋 -->
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+            <div class="view-toggle">
+              <button
+                onclick="toggleOrderGroup('customer')"
+                class="active"
+                id="group-customer"
+              >
+                按客戶
+              </button>
+              <button onclick="toggleOrderGroup('product')" id="group-product">
+                按商品
+              </button>
+            </div>
+            <button onclick="openOrderSearchModal()" class="btn-icon">
+              <svg
+                class="icon-lg"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </button>
+          </div>
+          <button
+            onclick="toggleBatchShipMode()"
+            id="batch-ship-btn"
+            class="btn-icon hidden"
+          >
+            <svg
+              class="icon-lg"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 批量出貨操作欄 -->
+        <div
+          id="batch-ship-toolbar"
+          class="hidden mb-4 p-4 bg-blue-50 rounded-2xl"
+        >
+          <div class="flex justify-between items-center">
+            <div class="text-sm font-semibold text-gray-900">
+              已選擇
+              <span id="selected-count" class="text-blue-600">0</span> 位客戶
+            </div>
+            <div class="flex gap-2">
+              <button
+                onclick="cancelBatchShip()"
+                class="btn-secondary text-sm py-2"
+              >
+                取消
+              </button>
+              <button
+                onclick="confirmBatchShip()"
+                class="btn-primary text-sm py-2"
+              >
+                確認出貨
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 搜尋結果標記 -->
+        <div id="order-search-result-info" class="hidden mb-4">
+          <span class="search-result-badge">
+            搜尋：「<span id="order-search-keyword-display"></span>」
+            <button onclick="clearOrderSearch()">
+              <svg
+                class="icon inline"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+
+        <!-- 狀態篩選 -->
+        <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-4">
+          <button
+            onclick="filterOrders('all')"
+            class="filter-btn btn-primary text-sm whitespace-nowrap"
+          >
+            全部
+          </button>
+          <button
+            onclick="filterOrders('pending')"
+            class="filter-btn btn-secondary text-sm whitespace-nowrap"
+          >
+            待採購
+          </button>
+          <button
+            onclick="filterOrders('purchased')"
+            class="filter-btn btn-secondary text-sm whitespace-nowrap"
+          >
+            已採購
+          </button>
+          <button
+            onclick="filterOrders('completed')"
+            class="filter-btn btn-secondary text-sm whitespace-nowrap"
+          >
+            已完成
+          </button>
+        </div>
+
+        <div id="orders-content"></div>
+      </div>
+
+      <!-- 模擬測試 -->
+      <div id="simulate" class="tab-content">
+        <!-- 匯率設定 -->
+        <div class="card p-5 mb-4 relative">
+          <div class="absolute top-4 right-4 bg-gray-900 px-3 py-1.5 rounded-lg">
+            <div class="font-bold text-white text-xs">
+              1 JPY = <span id="rate-display">0.21</span> TWD
+            </div>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            日幣匯率設定
+          </h3>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >給客戶的日幣匯率</label
+            >
+            <div class="flex gap-3">
+              <input
+                type="number"
+                id="exchange-rate"
+                step="0.01"
+                class="flex-1 text-md py-3"
+                placeholder="0.21"
+              />
+              <button
+                onclick="saveExchangeRate()"
+                class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                儲存
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 客戶管理 -->
+        <div class="card p-5 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-gray-900 flex items-center gap-2">
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              測試客戶管理
+            </h3>
+            <button onclick="showAddCustomerModal()" class="btn-icon">
+              <svg
+                class="icon-xl"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            </button>
+          </div>
+          <div id="customer-list" class="space-y-2"></div>
+        </div>
+
+        <!-- 模擬下單 -->
+        <div class="card p-5">
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+              />
+            </svg>
+            模擬客戶下單
+          </h3>
+          <p class="text-sm text-gray-500 mb-4">選擇商品來模擬客戶下單流程</p>
+          <div class="space-y-3" id="simulate-products"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部導航欄 -->
+    <div class="bottom-bar" id="bottom-bar">
+      <div class="flex justify-around items-center">
+        <button
+          onclick="switchTab('dashboard')"
+          class="nav-item active"
+          data-tab="dashboard"
+        >
+          <div class="nav-icon">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+              />
+            </svg>
+          </div>
+          <div class="nav-label">儀表板</div>
+        </button>
+        <button
+          onclick="switchTab('products')"
+          class="nav-item"
+          data-tab="products"
+        >
+          <div class="nav-icon">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
+              />
+            </svg>
+          </div>
+          <div class="nav-label">商品</div>
+        </button>
+        <button
+          onclick="switchTab('orders')"
+          class="nav-item"
+          data-tab="orders"
+        >
+          <div class="nav-icon">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
+              />
+            </svg>
+          </div>
+          <div class="nav-label">訂單</div>
+        </button>
+        <button
+          onclick="switchTab('simulate')"
+          class="nav-item"
+          data-tab="simulate"
+        >
+          <div class="nav-icon">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+              />
+            </svg>
+          </div>
+          <div class="nav-label">測試</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- 搜尋 Modal -->
+    <div
+      id="search-modal"
+      class="search-modal"
+      onclick="closeSearchModalOnBackdrop(event)"
+    >
+      <div class="search-modal-content">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">搜尋商品</h3>
+        <div class="search-input-wrapper">
+          <span class="search-input-icon">
+            <svg
+              class="icon-lg"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="search-modal-input"
+            placeholder="輸入商品名稱..."
+            onkeyup="handleSearchEnter(event)"
+          />
+          <div class="search-close-btn" onclick="closeSearchModal()">
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="executeSearch()" class="btn-primary flex-1 py-3">
+            搜尋
+          </button>
+          <button
+            onclick="closeSearchModal()"
+            class="btn-secondary flex-1 py-3"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 訂單搜尋 Modal -->
+    <div
+      id="order-search-modal"
+      class="search-modal"
+      onclick="closeOrderSearchModalOnBackdrop(event)"
+    >
+      <div class="search-modal-content">
+        <h3
+          class="text-lg font-bold text-gray-900 mb-4"
+          id="order-search-title"
+        >
+          搜尋客戶
+        </h3>
+        <div class="search-input-wrapper">
+          <span class="search-input-icon">
+            <svg
+              class="icon-lg"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="order-search-modal-input"
+            placeholder="輸入搜尋關鍵字..."
+            onkeyup="handleOrderSearchEnter(event)"
+          />
+          <div class="search-close-btn" onclick="closeOrderSearchModal()">
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button
+            onclick="executeOrderSearch()"
+            class="btn-primary flex-1 py-3"
+          >
+            搜尋
+          </button>
+          <button
+            onclick="closeOrderSearchModal()"
+            class="btn-secondary flex-1 py-3"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增/編輯商品 Modal -->
+    <div
+      id="product-modal"
+      class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style="padding-bottom: 100px"
+    >
+      <div class="card w-full max-w-md mx-auto my-8 max-h-[85vh] flex flex-col">
+        <div class="p-6 pb-4">
+          <h3 class="text-xl font-bold text-gray-900" id="modal-title">
+            新增商品
+          </h3>
+        </div>
+        <div class="px-6 overflow-y-auto flex-1">
+          <form id="product-form" onsubmit="saveProduct(event)">
+            <input type="hidden" id="product-id" />
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >商品名稱</label
+              >
+              <input type="text" id="product-name" required class="w-full" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >日幣售價</label
+              >
+              <div class="flex gap-2 items-center mb-2">
+                <input
+                  type="number"
+                  id="product-price-jpy"
+                  required
+                  class="flex-1"
+                  placeholder="1800"
+                  oninput="updateTWDPreview()"
+                />
+                <span class="text-gray-500 font-medium">JPY</span>
+              </div>
+              <div class="text-xs text-gray-500 mb-2">
+                當前匯率：1 JPY = <span id="modal-rate-display">0.21</span> TWD
+              </div>
+              <div
+                class="bg-gray-50 px-4 py-3 rounded-xl border border-gray-200"
+              >
+                <div class="text-xs text-gray-500 mb-1">台幣售價</div>
+                <div class="text-lg font-bold text-gray-900">
+                  NT$ <span id="product-price-twd-preview">0</span>
+                </div>
+              </div>
+              <input type="hidden" id="product-price-twd" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >庫存數量</label
+              >
+              <input type="number" id="product-stock" required class="w-full" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >商品圖片</label
+              >
+              <input
+                type="file"
+                id="product-image-file"
+                accept="image/*"
+                onchange="handleImageUpload(event)"
+                class="w-full mb-2"
+              />
+              <input
+                type="text"
+                id="product-image"
+                placeholder="或輸入圖片網址..."
+                class="w-full"
+              />
+              <img
+                id="image-preview"
+                class="image-upload-preview hidden"
+                alt="預覽"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="p-6 pt-4 border-t border-gray-100">
+          <div class="flex gap-3">
+            <button
+              type="button"
+              onclick="closeProductModal()"
+              class="btn-secondary flex-1 py-3"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              form="product-form"
+              class="btn-primary flex-1 py-3"
+            >
+              儲存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增客戶 Modal -->
+    <div
+      id="customer-modal"
+      class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style="padding-bottom: 100px"
+    >
+      <div class="card w-full max-w-md mx-auto">
+        <div class="p-6 pb-4">
+          <h3 class="text-xl font-bold text-gray-900">新增測試客戶</h3>
+        </div>
+        <div class="px-6 pb-6">
+          <form id="customer-form" onsubmit="saveCustomer(event)">
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >客戶名稱</label
+              >
+              <input
+                type="text"
+                id="customer-name"
+                required
+                class="w-full"
+                placeholder="例：王小明"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >LINE ID</label
+              >
+              <input
+                type="text"
+                id="customer-line-id"
+                required
+                class="w-full"
+                placeholder="例：user001"
+              />
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button
+                type="button"
+                onclick="closeCustomerModal()"
+                class="btn-secondary flex-1 py-3"
+              >
+                取消
+              </button>
+              <button type="submit" class="btn-primary flex-1 py-3">
+                新增
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 初始化假資料
+      const FAKE_CUSTOMERS = [{ id: 1, name: "POKA", lineId: "POKAPOKA" }];
+
+      const FAKE_PRODUCTS = [
+        {
+          id: 1,
+          name: "DHC 維他命C 60日份",
+          priceJPY: 388,
+          price: 82,
+          stock: 5,
+          status: "active",
+          image: "assets/C.png",
+        },
+        {
+          id: 2,
+          name: "DHC 維他命D 60日份",
+          priceJPY: 389,
+          price: 82,
+          stock: 3,
+          status: "active",
+          image: "assets/D.png",
+        },
+        {
+          id: 3,
+          name: "DHC 薏仁精華 60日份",
+          priceJPY: 1170,
+          price: 246,
+          stock: 10,
+          status: "active",
+          image: "assets/薏仁精華.png",
+        },
+        {
+          id: 4,
+          name: "DHC 光敏感葉黃素 60日份",
+          priceJPY: 1821,
+          price: 382,
+          stock: 10,
+          status: "active",
+          image: "assets/光敏感葉黃素.png",
+        },
+        {
+          id: 5,
+          name: "無印良品 無印良品美容液A醇",
+          priceJPY: 2490,
+          price: 523,
+          stock: 10,
+          status: "active",
+          image: "assets/無印良品美容液A醇.png",
+        },
+        {
+          id: 6,
+          name: "無印良品 無印良品美容液C",
+          priceJPY: 2490,
+          price: 523,
+          stock: 10,
+          status: "active",
+          image: "assets/無印良品美容液C.png",
+        },
+      ];
+
+      const FAKE_ORDERS = [
+        {
+          id: 1,
+          orderNumber: "20240309-001",
+          customerId: 1,
+          productId: 1,
+          quantity: 2,
+          priceJPY: 388,
+          exchangeRate: 0.21,
+          totalAmount: 164,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          orderNumber: "20240309-002",
+          customerId: 1,
+          productId: 2,
+          quantity: 2,
+          priceJPY: 389,
+          exchangeRate: 0.21,
+          totalAmount: 164,
+          status: "pending",
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          id: 3,
+          orderNumber: "20240309-003",
+          customerId: 1,
+          productId: 3,
+          quantity: 2,
+          priceJPY: 1170,
+          exchangeRate: 0.21,
+          totalAmount: 492,
+          status: "pending",
+          createdAt: new Date(Date.now() - 7200000).toISOString(),
+        },
+        {
+          id: 4,
+          orderNumber: "20240309-004",
+          customerId: 1,
+          productId: 4,
+          quantity: 2,
+          priceJPY: 1821,
+          exchangeRate: 0.21,
+          totalAmount: 764,
+          status: "pending",
+          createdAt: new Date(Date.now() - 10800000).toISOString(),
+        },
+        {
+          id: 5,
+          orderNumber: "20240309-005",
+          customerId: 1,
+          productId: 5,
+          quantity: 1,
+          priceJPY: 2490,
+          exchangeRate: 0.21,
+          totalAmount: 523,
+          status: "pending",
+          createdAt: new Date(Date.now() - 14400000).toISOString(),
+        },
+        {
+          id: 6,
+          orderNumber: "20240309-006",
+          customerId: 1,
+          productId: 6,
+          quantity: 1,
+          priceJPY: 2490,
+          exchangeRate: 0.21,
+          totalAmount: 523,
+          status: "pending",
+          createdAt: new Date(Date.now() - 18000000).toISOString(),
+        },
+      ];
+
+      let currentTab = "dashboard";
+      let currentProductView = "card";
+      let currentOrderGroup = "customer";
+      let currentOrderFilter = "all";
+      let currentSearchKeyword = "";
+      let currentOrderSearchKeyword = "";
+      let isBatchShipMode = false;
+      let selectedCustomers = new Set();
+
+      // 預設日幣匯率
+      const DEFAULT_EXCHANGE_RATE = 0.21;
+
+      function initData() {
+        if (!localStorage.getItem("products")) {
+          localStorage.setItem("products", JSON.stringify(FAKE_PRODUCTS));
+        }
+        if (!localStorage.getItem("orders")) {
+          localStorage.setItem("orders", JSON.stringify(FAKE_ORDERS));
+        }
+        if (!localStorage.getItem("customers")) {
+          localStorage.setItem("customers", JSON.stringify(FAKE_CUSTOMERS));
+        }
+        if (!localStorage.getItem("exchangeRate")) {
+          localStorage.setItem("exchangeRate", DEFAULT_EXCHANGE_RATE);
+        }
+      }
+
+      function resetData() {
+        if (confirm("確定要重置所有資料嗎？")) {
+          localStorage.clear();
+          initData();
+          location.reload();
+        }
+      }
+
+      function getProducts() {
+        return JSON.parse(localStorage.getItem("products") || "[]");
+      }
+
+      function getOrders() {
+        return JSON.parse(localStorage.getItem("orders") || "[]");
+      }
+
+      function getCustomers() {
+        return JSON.parse(localStorage.getItem("customers") || "[]");
+      }
+
+      function saveCustomers(customers) {
+        localStorage.setItem("customers", JSON.stringify(customers));
+      }
+
+      function getExchangeRate() {
+        return parseFloat(
+          localStorage.getItem("exchangeRate") || DEFAULT_EXCHANGE_RATE,
+        );
+      }
+
+      function saveExchangeRate() {
+        const rate =
+          parseFloat(document.getElementById("exchange-rate").value) || 0.21;
+        localStorage.setItem("exchangeRate", rate);
+        updateRateDisplay();
+      }
+
+      function updateRateDisplay() {
+        const rate = getExchangeRate();
+        document.getElementById("rate-display").textContent = rate;
+      }
+
+      function updateTWDPreview() {
+        const priceJPY =
+          parseFloat(document.getElementById("product-price-jpy").value) || 0;
+        const rate = getExchangeRate();
+        const priceTWD = Math.round(priceJPY * rate);
+
+        document.getElementById("product-price-twd-preview").textContent =
+          priceTWD;
+        document.getElementById("product-price-twd").value = priceTWD;
+        document.getElementById("modal-rate-display").textContent = rate;
+      }
+
+      function saveProducts(products) {
+        localStorage.setItem("products", JSON.stringify(products));
+      }
+
+      function saveOrders(orders) {
+        localStorage.setItem("orders", JSON.stringify(orders));
+      }
+
+      function switchTab(tabName) {
+        currentTab = tabName;
+
+        // 切換內容
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+        document.getElementById(tabName).classList.add("active");
+
+        // 更新底部導航狀態
+        document.querySelectorAll(".nav-item").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document
+          .querySelector(`.nav-item[data-tab="${tabName}"]`)
+          .classList.add("active");
+
+        // 更新頁面標題
+        const titles = {
+          dashboard: "儀表板",
+          products: "商品管理",
+          orders: "訂單管理",
+          simulate: "模擬測試",
+        };
+        document.getElementById("page-title").textContent = titles[tabName];
+
+        // 處理批量出貨按鈕顯示/隱藏
+        const batchShipBtn = document.getElementById("batch-ship-btn");
+        if (tabName === "orders" && currentOrderGroup === "customer") {
+          batchShipBtn.classList.remove("hidden");
+        } else {
+          batchShipBtn.classList.add("hidden");
+          // 如果離開訂單頁面且正在批量模式，自動退出
+          if (isBatchShipMode) {
+            cancelBatchShip();
+          }
+        }
+
+        // 渲染對應內容
+        if (tabName === "dashboard") renderDashboard();
+        if (tabName === "products") renderProducts();
+        if (tabName === "orders") renderOrders();
+        if (tabName === "simulate") renderSimulate();
+      }
+
+      function renderDashboard() {
+        const orders = getOrders();
+        const today = new Date().toDateString();
+
+        const todayOrders = orders.filter(
+          (o) => new Date(o.createdAt).toDateString() === today,
+        );
+        const todayRevenue = todayOrders.reduce(
+          (sum, o) => sum + o.totalAmount,
+          0,
+        );
+        const pendingOrders = orders.filter(
+          (o) => o.status === "pending",
+        ).length;
+
+        document.getElementById("stat-orders").textContent = todayOrders.length;
+        document.getElementById("stat-revenue").textContent =
+          `$${todayRevenue.toLocaleString()}`;
+        document.getElementById("stat-pending").textContent = pendingOrders;
+
+        const recentOrders = orders.slice(-5).reverse();
+        const customers = getCustomers();
+        const products = getProducts();
+
+        const statusText = {
+          pending: "待採購",
+          purchased: "已採購",
+          completed: "已完成",
+        };
+
+        const html = recentOrders
+          .map((order) => {
+            const customer = customers.find((c) => c.id === order.customerId);
+            const product = products.find((p) => p.id === order.productId);
+
+            return `
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-400 mb-1">${order.orderNumber}</div>
+                            <div class="font-semibold text-sm text-gray-900">${customer?.name}</div>
+                            <div class="text-xs text-gray-500 mt-1">${product?.name}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm mb-1">$${order.totalAmount.toLocaleString()}</div>
+                            <span class="status-badge status-${order.status}">${statusText[order.status]}</span>
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+
+        document.getElementById("recent-orders").innerHTML =
+          html ||
+          '<div class="text-gray-400 text-center text-sm py-8">尚無訂單</div>';
+      }
+
+      function openSearchModal() {
+        document.getElementById("search-modal").classList.add("active");
+        // 聚焦輸入框
+        setTimeout(() => {
+          document.getElementById("search-modal-input").focus();
+        }, 300);
+      }
+
+      function closeSearchModal() {
+        document.getElementById("search-modal").classList.remove("active");
+      }
+
+      function closeSearchModalOnBackdrop(event) {
+        if (event.target.id === "search-modal") {
+          closeSearchModal();
+        }
+      }
+
+      function handleSearchEnter(event) {
+        if (event.key === "Enter") {
+          executeSearch();
+        }
+      }
+
+      function executeSearch() {
+        const keyword = document
+          .getElementById("search-modal-input")
+          .value.trim();
+        if (keyword) {
+          currentSearchKeyword = keyword.toLowerCase();
+          document.getElementById("search-keyword-display").textContent =
+            keyword;
+          document
+            .getElementById("search-result-info")
+            .classList.remove("hidden");
+          renderProducts();
+          closeSearchModal();
+        } else {
+          alert("請輸入搜尋關鍵字");
+        }
+      }
+
+      function clearSearch() {
+        currentSearchKeyword = "";
+        document.getElementById("search-modal-input").value = "";
+        document.getElementById("search-result-info").classList.add("hidden");
+        renderProducts();
+      }
+
+      function openOrderSearchModal() {
+        const searchTitle =
+          currentOrderGroup === "customer" ? "搜尋客戶" : "搜尋商品";
+        const placeholder =
+          currentOrderGroup === "customer"
+            ? "輸入客戶名稱..."
+            : "輸入商品名稱...";
+
+        document.getElementById("order-search-title").textContent = searchTitle;
+        document.getElementById("order-search-modal-input").placeholder =
+          placeholder;
+        document.getElementById("order-search-modal").classList.add("active");
+
+        setTimeout(() => {
+          document.getElementById("order-search-modal-input").focus();
+        }, 300);
+      }
+
+      function closeOrderSearchModal() {
+        document
+          .getElementById("order-search-modal")
+          .classList.remove("active");
+      }
+
+      function closeOrderSearchModalOnBackdrop(event) {
+        if (event.target.id === "order-search-modal") {
+          closeOrderSearchModal();
+        }
+      }
+
+      function handleOrderSearchEnter(event) {
+        if (event.key === "Enter") {
+          executeOrderSearch();
+        }
+      }
+
+      function executeOrderSearch() {
+        const keyword = document
+          .getElementById("order-search-modal-input")
+          .value.trim();
+        if (keyword) {
+          currentOrderSearchKeyword = keyword.toLowerCase();
+          document.getElementById("order-search-keyword-display").textContent =
+            keyword;
+          document
+            .getElementById("order-search-result-info")
+            .classList.remove("hidden");
+          renderOrders();
+          closeOrderSearchModal();
+        } else {
+          alert("請輸入搜尋關鍵字");
+        }
+      }
+
+      function clearOrderSearch() {
+        currentOrderSearchKeyword = "";
+        document.getElementById("order-search-modal-input").value = "";
+        document
+          .getElementById("order-search-result-info")
+          .classList.add("hidden");
+        renderOrders();
+      }
+
+      function toggleAccordion(id) {
+        const content = document.getElementById(`accordion-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+
+        if (content.classList.contains("active")) {
+          content.classList.remove("active");
+          icon.classList.remove("rotated");
+        } else {
+          content.classList.add("active");
+          icon.classList.add("rotated");
+        }
+      }
+
+      function toggleProductView(view) {
+        currentProductView = view;
+
+        document.querySelectorAll(".view-toggle button").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        document.getElementById(`view-${view}`).classList.add("active");
+
+        if (view === "card") {
+          document
+            .getElementById("products-card-view")
+            .classList.remove("hidden");
+          document.getElementById("products-list-view").classList.add("hidden");
+        } else {
+          document.getElementById("products-card-view").classList.add("hidden");
+          document
+            .getElementById("products-list-view")
+            .classList.remove("hidden");
+        }
+
+        renderProducts();
+      }
+
+      function renderProducts() {
+        let products = getProducts();
+
+        // 搜尋過濾
+        if (currentSearchKeyword) {
+          products = products.filter((p) =>
+            p.name.toLowerCase().includes(currentSearchKeyword),
+          );
+        }
+
+        const statusText = {
+          active: "上架中",
+          sold_out: "已售完",
+        };
+
+        if (currentProductView === "card") {
+          const html = products
+            .map(
+              (product) => `
+                    <div class="card overflow-hidden">
+                        <img src="${product.image || "https://via.placeholder.com/400"}" alt="" class="w-full h-40 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="openImageModal('${product.image || "https://via.placeholder.com/400"}')">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-sm text-gray-900 flex-1 line-clamp-2">${product.name}</h3>
+                                <span class="status-badge status-${product.status} ml-2 text-xs">${statusText[product.status]}</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-3">
+                                <div>
+                                    <div class="text-xs text-gray-500">¥${product.priceJPY}</div>
+                                    <div class="text-lg font-bold text-gray-900">NT$${product.price}</div>
+                                </div>
+                                <span class="text-xs text-gray-500">庫存 ${product.stock}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editProduct(${product.id})" class="flex-1 py-2 bg-gray-100 text-gray-900 rounded-xl text-xs font-semibold">編輯</button>
+                                <button onclick="toggleProductStatus(${product.id})" class="flex-1 py-2 ${product.status === "active" ? "bg-orange-50 text-orange-600" : "bg-green-50 text-green-600"} rounded-xl text-xs font-semibold">
+                                    ${product.status === "active" ? "下架" : "上架"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `,
+            )
+            .join("");
+          document.getElementById("products-card-view").innerHTML =
+            html ||
+            '<div class="col-span-2 text-center text-gray-400 py-12">尚無商品</div>';
+        } else {
+          const html = products
+            .map(
+              (product) => `
+                    <div class="card p-4">
+                        <div class="flex gap-3">
+                            <img src="${product.image || "https://via.placeholder.com/80"}" alt="" class="w-20 h-20 rounded-2xl object-cover flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity" onclick="openImageModal('${product.image || "https://via.placeholder.com/80"}')">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-sm truncate flex-1">${product.name}</h3>
+                                    <span class="status-badge status-${product.status} ml-2 text-xs">${statusText[product.status]}</span>
+                                </div>
+                                <div class="mb-1">
+                                    <span class="text-xs text-gray-500">¥${product.priceJPY}</span>
+                                    <span class="text-lg font-bold text-gray-900 ml-2">NT$${product.price}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-3">庫存: ${product.stock}</div>
+                                <div class="flex gap-2">
+                                    <button onclick="editProduct(${product.id})" class="px-4 py-2 bg-gray-100 text-gray-900 rounded-xl text-xs font-semibold">編輯</button>
+                                    <button onclick="toggleProductStatus(${product.id})" class="px-4 py-2 ${product.status === "active" ? "bg-orange-50 text-orange-600" : "bg-green-50 text-green-600"} rounded-xl text-xs font-semibold">
+                                        ${product.status === "active" ? "下架" : "上架"}
+                                    </button>
+                                    <button onclick="deleteProduct(${product.id})" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-semibold">刪除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+            )
+            .join("");
+          document.getElementById("products-list-view").innerHTML =
+            html ||
+            '<div class="text-center text-gray-400 py-12">尚無商品</div>';
+        }
+      }
+
+      function toggleOrderGroup(group) {
+        currentOrderGroup = group;
+
+        // 更新按鈕狀態
+        document
+          .querySelectorAll("#orders .view-toggle button")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+        document.getElementById(`group-${group}`).classList.add("active");
+
+        // 顯示/隱藏批量出貨按鈕（僅在按客戶頁籤顯示）
+        const batchShipBtn = document.getElementById("batch-ship-btn");
+        if (group === "customer") {
+          batchShipBtn.classList.remove("hidden");
+        } else {
+          batchShipBtn.classList.add("hidden");
+          // 如果正在批量模式，自動退出
+          if (isBatchShipMode) {
+            cancelBatchShip();
+          }
+        }
+
+        // 清除搜尋（因為切換頁籤後搜尋目標不同）
+        clearOrderSearch();
+
+        renderOrders();
+      }
+
+      function filterOrders(status) {
+        currentOrderFilter = status;
+
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.className = "filter-btn btn-secondary text-sm whitespace-nowrap";
+        });
+        event.target.className =
+          "filter-btn btn-primary text-sm whitespace-nowrap";
+
+        renderOrders();
+      }
+
+      function renderOrders() {
+        let orders = getOrders();
+        const customers = getCustomers();
+        const products = getProducts();
+
+        if (currentOrderFilter !== "all") {
+          orders = orders.filter((o) => o.status === currentOrderFilter);
+        }
+
+        // 搜尋過濾
+        if (currentOrderSearchKeyword) {
+          if (currentOrderGroup === "customer") {
+            // 按客戶分組時，過濾客戶名稱
+            const filteredCustomerIds = customers
+              .filter((c) =>
+                c.name.toLowerCase().includes(currentOrderSearchKeyword),
+              )
+              .map((c) => c.id);
+            orders = orders.filter((o) =>
+              filteredCustomerIds.includes(o.customerId),
+            );
+          } else {
+            // 按商品分組時，過濾商品名稱
+            const filteredProductIds = products
+              .filter((p) =>
+                p.name.toLowerCase().includes(currentOrderSearchKeyword),
+              )
+              .map((p) => p.id);
+            orders = orders.filter((o) =>
+              filteredProductIds.includes(o.productId),
+            );
+          }
+        }
+
+        const statusText = {
+          pending: "待採購",
+          purchased: "已採購",
+          completed: "已完成",
+        };
+
+        let html = "";
+
+        if (currentOrderGroup === "customer") {
+          const customerGroups = {};
+          orders.forEach((order) => {
+            if (!customerGroups[order.customerId]) {
+              customerGroups[order.customerId] = [];
+            }
+            customerGroups[order.customerId].push(order);
+          });
+
+          html = Object.entries(customerGroups)
+            .map(([customerId, customerOrders], index) => {
+              const customer = customers.find(
+                (c) => c.id === parseInt(customerId),
+              );
+              const totalAmount = customerOrders.reduce(
+                (sum, o) => sum + o.totalAmount,
+                0,
+              );
+              const accordionId = `customer-${customerId}`;
+              const isSelected = selectedCustomers.has(parseInt(customerId));
+
+              // 檢查是否有可出貨的訂單（已採購狀態）
+              const hasPurchasedOrders = customerOrders.some(
+                (o) => o.status === "purchased",
+              );
+              const isDisabled = !hasPurchasedOrders;
+
+              const productGroups = {};
+              customerOrders.forEach((order) => {
+                if (!productGroups[order.productId]) {
+                  productGroups[order.productId] = {
+                    orders: [],
+                    totalQuantity: 0,
+                    totalAmount: 0,
+                  };
+                }
+                productGroups[order.productId].orders.push(order);
+                productGroups[order.productId].totalQuantity += order.quantity;
+                productGroups[order.productId].totalAmount += order.totalAmount;
+              });
+
+              // 檢查是否有已完成訂單
+              const hasCompletedOrders = customerOrders.some(
+                (o) => o.status === "completed",
+              );
+
+              const orderItems = Object.entries(productGroups)
+                .map(([productId, group]) => {
+                  const product = products.find(
+                    (p) => p.id === parseInt(productId),
+                  );
+                  const hasMultiple = group.orders.length > 1;
+
+                  const orderDetails = hasMultiple
+                    ? `
+                            <div class="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                                <div class="text-xs text-gray-400 font-semibold mb-2">包含 ${group.orders.length} 筆訂單</div>
+                                ${group.orders
+                                  .map(
+                                    (order) => `
+                                    <div class="flex justify-between items-center text-xs bg-white p-3 rounded-xl">
+                                        <div class="flex-1">
+                                            <span class="text-gray-500">${order.orderNumber}</span>
+                                            <span class="ml-2 status-badge status-${order.status}">${statusText[order.status]}</span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            ${
+                                              order.status === "pending"
+                                                ? `<button onclick="updateOrderStatus(${order.id}, 'purchased')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-semibold">確認</button>`
+                                                : ""
+                                            }
+                                        </div>
+                                    </div>
+                                `,
+                                  )
+                                  .join("")}
+                            </div>
+                        `
+                    : "";
+
+                  const singleButton =
+                    !hasMultiple && group.orders[0].status === "pending"
+                      ? `
+                            <button onclick="updateOrderStatus(${group.orders[0].id}, 'purchased')" class="mt-3 w-full py-3 bg-blue-600 text-white rounded-xl font-semibold">確認採購</button>
+                        `
+                      : "";
+
+                  return `
+                            <div class="product-item">
+                                <div class="w-full">
+                                    <div class="flex items-start gap-3 mb-2">
+                                        <img src="${product?.image || "https://via.placeholder.com/60"}" class="w-16 h-16 rounded-2xl object-cover flex-shrink-0">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-semibold text-sm text-gray-900 mb-1">${product?.name || "已刪除商品"}</div>
+                                            <div class="text-xs text-gray-500 mb-2">
+                                                數量: ${group.totalQuantity} × (¥${product?.priceJPY || 0} / NT$${product?.price || 0})
+                                                ${hasMultiple ? `<span class="ml-1 text-blue-600 font-semibold">(合併 ${group.orders.length} 筆)</span>` : ""}
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm font-bold text-gray-900">NT$${group.totalAmount.toLocaleString()}</span>
+                                                ${!hasMultiple ? `<span class="status-badge status-${group.orders[0].status}">${statusText[group.orders[0].status]}</span>` : ""}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    ${singleButton}
+                                    ${orderDetails}
+                                </div>
+                            </div>
+                        `;
+                })
+                .join("");
+
+              // 批量模式下的選擇框
+              const checkboxHtml = isBatchShipMode
+                ? `
+                        <div class="flex items-center mr-3" onclick="event.stopPropagation(); ${!isDisabled ? `toggleCustomerSelection(${customerId})` : ""}">
+                            <div class="w-6 h-6 rounded-lg border-2 ${isDisabled ? "bg-gray-200 border-gray-300 opacity-50" : isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300"} flex items-center justify-center ${!isDisabled ? "cursor-pointer" : "cursor-not-allowed"} transition-all">
+                                ${
+                                  isSelected && !isDisabled
+                                    ? `
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                `
+                                    : ""
+                                }
+                            </div>
+                        </div>
+                    `
+                : "";
+
+              // 複製按鈕（只在有已完成訂單時顯示）
+              const copyButtonHtml =
+                hasCompletedOrders && !isBatchShipMode
+                  ? `
+                        <button onclick="event.stopPropagation(); copyCustomerOrderInfo(${customerId})"
+                                class="flex items-center gap-1.5 my-1 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors"
+                                title="複製已完成訂單資訊">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>複製出貨資訊</span>
+                        </button>
+                    `
+                  : "";
+
+              return `
+                        <div class="order-card ${isBatchShipMode && isSelected ? "ring-2 ring-blue-500" : ""} ${isBatchShipMode && isDisabled ? "opacity-60" : ""}">
+                            <div class="order-header accordion-toggle" onclick="toggleAccordion('${accordionId}')">
+                                <div class="flex justify-between items-center">
+                                    ${checkboxHtml}
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <div class="font-bold text-gray-900 text-lg flex items-center gap-2">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                </svg>
+                                                <span>${customer?.name || "未知客戶"}</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-xs text-gray-500">${Object.keys(productGroups).length} 種商品 · ${customerOrders.length} 筆訂單</div>
+                                                                            ${copyButtonHtml}
+                                        </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <div class="text-2xl font-bold text-gray-900">NT$${totalAmount.toLocaleString()}</div>
+                                            <div class="text-xs text-gray-500">總金額</div>
+                                        </div>
+                                        <svg id="icon-${accordionId}" class="accordion-icon w-6 h-6 text-gray-400 ${index === 0 ? "rotated" : ""}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="accordion-${accordionId}" class="accordion-content ${index === 0 ? "active" : ""}">
+                                <div class="p-5">
+                                    ${orderItems}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            })
+            .join("");
+        } else {
+          const productGroups = {};
+          orders.forEach((order) => {
+            if (!productGroups[order.productId]) {
+              productGroups[order.productId] = [];
+            }
+            productGroups[order.productId].push(order);
+          });
+
+          html = Object.entries(productGroups)
+            .map(([productId, productOrders], index) => {
+              const product = products.find(
+                (p) => p.id === parseInt(productId),
+              );
+              const totalQuantity = productOrders.reduce(
+                (sum, o) => sum + o.quantity,
+                0,
+              );
+              const accordionId = `product-${productId}`;
+
+              productOrders.sort(
+                (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+              );
+
+              const orderItems = productOrders
+                .map((order, idx) => {
+                  const customer = customers.find(
+                    (c) => c.id === order.customerId,
+                  );
+                  return `
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="w-7 h-7 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+                                            ${idx + 1}
+                                        </span>
+                                        <span class="font-semibold text-sm text-gray-900">${customer?.name || "未知"}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 ml-9">
+                                        ${order.quantity} 個 × (¥${product?.priceJPY || 0} / NT$${product?.price || 0}) = NT$${order.totalAmount.toLocaleString()}
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-9 mt-0.5">${order.orderNumber}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="status-badge status-${order.status} block mb-2">${statusText[order.status]}</span>
+                                    ${
+                                      order.status === "pending"
+                                        ? `<button onclick="updateOrderStatus(${order.id}, 'purchased')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold">確認</button>`
+                                        : ""
+                                    }
+                                </div>
+                            </div>
+                        `;
+                })
+                .join("");
+
+              return `
+                        <div class="order-card">
+                            <div class="p-5 bg-blue-50 accordion-toggle" onclick="toggleAccordion('${accordionId}')">
+                                <div class="flex gap-4">
+                                    <img src="${product?.image || "https://via.placeholder.com/80"}" class="w-20 h-20 rounded-2xl object-cover flex-shrink-0">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-gray-900 mb-1 flex items-center gap-2">
+                                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                            </svg>
+                                            <span class="flex-1">${product?.name || "已刪除商品"}</span>
+                                            <svg id="icon-${accordionId}" class="accordion-icon w-6 h-6 text-gray-600 flex-shrink-0 ${index === 0 ? "rotated" : ""}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-2">單價: ¥${product?.priceJPY || 0} / NT$${product?.price || 0}</div>
+                                        <div class="flex gap-4 text-xs">
+                                            <span class="text-gray-600">${productOrders.length} 位客戶</span>
+                                            <span class="font-bold text-blue-600">總需採購: ${totalQuantity} 個</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="accordion-${accordionId}" class="accordion-content ${index === 0 ? "active" : ""}">
+                                <div class="p-5">
+                                    <div class="text-xs text-gray-400 font-semibold mb-3 flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>依下單時間排序（優先順序）</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        ${orderItems}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            })
+            .join("");
+        }
+
+        document.getElementById("orders-content").innerHTML =
+          html ||
+          '<div class="text-center text-gray-400 py-12">無符合條件的訂單</div>';
+      }
+
+      function renderSimulate() {
+        // 渲染匯率設定
+        const rate = getExchangeRate();
+        document.getElementById("exchange-rate").value = rate;
+        updateRateDisplay();
+
+        // 渲染客戶清單
+        const customers = getCustomers();
+        const customerHtml = customers
+          .map(
+            (customer) => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold">
+                            ${customer.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="font-semibold text-sm text-gray-900">${customer.name}</div>
+                            <div class="text-xs text-gray-500">${customer.lineId}</div>
+                        </div>
+                    </div>
+                    <button onclick="deleteCustomer(${customer.id})" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-100 transition-colors">
+                        刪除
+                    </button>
+                </div>
+            `,
+          )
+          .join("");
+        document.getElementById("customer-list").innerHTML =
+          customerHtml ||
+          '<div class="text-center text-gray-400 text-sm py-6">尚無測試客戶</div>';
+
+        // 渲染商品清單（含客戶選擇）
+        const products = getProducts().filter(
+          (p) => p.status === "active" && p.stock > 0,
+        );
+
+        if (customers.length === 0) {
+          document.getElementById("simulate-products").innerHTML =
+            '<div class="text-center text-gray-400 py-12">請先新增測試客戶</div>';
+          return;
+        }
+
+        const customerOptions = customers
+          .map((c) => `<option value="${c.id}">${c.name}</option>`)
+          .join("");
+
+        const html = products
+          .map(
+            (product) => `
+                <div class="card">
+                    <div class="flex items-center gap-4">
+                        <img src="${product.image || "https://via.placeholder.com/400"}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-sm text-gray-900 mb-1 truncate">${product.name}</h3>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-lg font-bold text-gray-900">$${product.price}</span>
+                                <span class="text-xs text-gray-500">庫存 ${product.stock}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">選擇客戶</label>
+                            <select id="customer-select-${product.id}" class="w-full text-sm py-2 px-3 border border-gray-300 rounded-lg">
+                                ${customerOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">購買數量</label>
+                            <select id="quantity-select-${product.id}" class="w-full text-sm py-2 px-3 border border-gray-300 rounded-lg">
+                                ${Array.from({length: Math.min(10, product.stock)}, (_, i) => i + 1).map(n => `<option value="${n}">${n}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="simulateOrderWithCustomer(${product.id})" class="w-full mt-3 py-2.5 bg-gray-900 text-white rounded-lg font-semibold flex items-center justify-center gap-2 text-sm hover:bg-gray-800 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                        </svg>
+                        <span>模擬下單</span>
+                    </button>
+                </div>
+            `,
+          )
+          .join("");
+
+        document.getElementById("simulate-products").innerHTML =
+          html ||
+          '<div class="text-center text-gray-400 py-12">目前沒有可下單的商品</div>';
+      }
+
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const imageData = e.target.result;
+            document.getElementById("product-image").value = imageData;
+            document.getElementById("image-preview").src = imageData;
+            document.getElementById("image-preview").classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function showAddProductModal() {
+        document.getElementById("modal-title").textContent = "新增商品";
+        document.getElementById("product-form").reset();
+        document.getElementById("product-id").value = "";
+        document.getElementById("image-preview").classList.add("hidden");
+
+        // 設定匯率顯示和預覽
+        const rate = getExchangeRate();
+        document.getElementById("modal-rate-display").textContent = rate;
+        document.getElementById("product-price-twd-preview").textContent = "0";
+
+        document.getElementById("product-modal").classList.remove("hidden");
+      }
+
+      function editProduct(id) {
+        const products = getProducts();
+        const product = products.find((p) => p.id === id);
+
+        document.getElementById("modal-title").textContent = "編輯商品";
+        document.getElementById("product-id").value = product.id;
+        document.getElementById("product-name").value = product.name;
+        document.getElementById("product-price-jpy").value =
+          product.priceJPY || 0;
+        document.getElementById("product-stock").value = product.stock;
+        document.getElementById("product-image").value = product.image || "";
+
+        // 更新台幣預覽
+        updateTWDPreview();
+
+        // 顯示圖片預覽
+        if (product.image) {
+          document.getElementById("image-preview").src = product.image;
+          document.getElementById("image-preview").classList.remove("hidden");
+        } else {
+          document.getElementById("image-preview").classList.add("hidden");
+        }
+
+        document.getElementById("product-modal").classList.remove("hidden");
+      }
+
+      function closeProductModal() {
+        document.getElementById("product-modal").classList.add("hidden");
+      }
+
+      function saveProduct(event) {
+        event.preventDefault();
+
+        const products = getProducts();
+        const id = document.getElementById("product-id").value;
+        const priceJPY = parseFloat(
+          document.getElementById("product-price-jpy").value,
+        );
+        const priceTWD = parseFloat(
+          document.getElementById("product-price-twd").value,
+        );
+
+        const productData = {
+          name: document.getElementById("product-name").value,
+          priceJPY: priceJPY,
+          price: priceTWD,
+          stock: parseInt(document.getElementById("product-stock").value),
+          image: document.getElementById("product-image").value,
+        };
+
+        if (id) {
+          const index = products.findIndex((p) => p.id === parseInt(id));
+          products[index] = { ...products[index], ...productData };
+        } else {
+          const newId =
+            products.length > 0
+              ? Math.max(...products.map((p) => p.id)) + 1
+              : 1;
+          products.push({
+            id: newId,
+            ...productData,
+            status: "active",
+          });
+        }
+
+        saveProducts(products);
+        closeProductModal();
+        renderProducts();
+        alert("✓ 商品已儲存！");
+      }
+
+      function toggleProductStatus(id) {
+        const products = getProducts();
+        const product = products.find((p) => p.id === id);
+
+        // 檢查：如果是要上架，但庫存為0，強制編輯
+        if (product.status === "sold_out" && product.stock === 0) {
+          alert("⚠️ 庫存數量為 0，請先更新商品庫存才能上架！");
+          editProduct(id);
+          return;
+        }
+
+        product.status = product.status === "active" ? "sold_out" : "active";
+        saveProducts(products);
+        renderProducts();
+      }
+
+      function deleteProduct(id) {
+        if (confirm("確定要刪除此商品嗎？")) {
+          const products = getProducts().filter((p) => p.id !== id);
+          saveProducts(products);
+          renderProducts();
+        }
+      }
+
+      function updateOrderStatus(orderId, newStatus) {
+        const orders = getOrders();
+        const order = orders.find((o) => o.id === orderId);
+        order.status = newStatus;
+        saveOrders(orders);
+        renderOrders();
+        renderDashboard();
+
+        const statusText = {
+          purchased: "已確認採購",
+          completed: "已標記出貨",
+        };
+        alert(`✓ ${statusText[newStatus]}！`);
+      }
+
+      function simulateOrderWithCustomer(productId) {
+        // 從下拉選單取得選中的客戶和數量
+        const selectedCustomerId = parseInt(
+          document.getElementById(`customer-select-${productId}`).value,
+        );
+        const quantity = parseInt(
+          document.getElementById(`quantity-select-${productId}`).value,
+        );
+        const customers = getCustomers();
+        const selectedCustomer = customers.find(
+          (c) => c.id === selectedCustomerId,
+        );
+
+        if (!selectedCustomer) {
+          alert("❌ 請選擇客戶！");
+          return;
+        }
+
+        const products = getProducts();
+        const product = products.find((p) => p.id === productId);
+
+        if (product.stock < quantity) {
+          alert("❌ 庫存不足！");
+          return;
+        }
+
+        const orders = getOrders();
+        const newOrderNumber = `${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(orders.length + 1).padStart(3, "0")}`;
+        const exchangeRate = getExchangeRate();
+
+        const newOrder = {
+          id: orders.length > 0 ? Math.max(...orders.map((o) => o.id)) + 1 : 1,
+          orderNumber: newOrderNumber,
+          customerId: selectedCustomer.id,
+          productId: productId,
+          quantity: quantity,
+          priceJPY: product.priceJPY,
+          exchangeRate: exchangeRate,
+          totalAmount: product.price * quantity,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        };
+
+        orders.push(newOrder);
+        saveOrders(orders);
+
+        product.stock -= quantity;
+        if (product.stock === 0) {
+          product.status = "sold_out";
+        }
+        saveProducts(products);
+
+        alert(
+          `✓ 模擬下單成功！\n\n訂單編號: ${newOrderNumber}\n客戶: ${selectedCustomer.name}\n商品: ${product.name}\n數量: ${quantity}`,
+        );
+        renderSimulate();
+        renderDashboard();
+      }
+
+      // 批量出貨相關功能
+      function toggleBatchShipMode() {
+        isBatchShipMode = !isBatchShipMode;
+        selectedCustomers.clear();
+
+        const toolbar = document.getElementById("batch-ship-toolbar");
+        const batchBtn = document.getElementById("batch-ship-btn");
+
+        if (isBatchShipMode) {
+          toolbar.classList.remove("hidden");
+          batchBtn.style.background = "#2563eb";
+        } else {
+          toolbar.classList.add("hidden");
+          batchBtn.style.background = "#2B2B2B";
+        }
+
+        updateSelectedCount();
+        renderOrders();
+      }
+
+      function toggleCustomerSelection(customerId) {
+        if (selectedCustomers.has(customerId)) {
+          selectedCustomers.delete(customerId);
+        } else {
+          selectedCustomers.add(customerId);
+        }
+        updateSelectedCount();
+        renderOrders();
+      }
+
+      function updateSelectedCount() {
+        document.getElementById("selected-count").textContent =
+          selectedCustomers.size;
+      }
+
+      function confirmBatchShip() {
+        if (selectedCustomers.size === 0) {
+          alert("❌ 請至少選擇一位客戶");
+          return;
+        }
+
+        const orders = getOrders();
+        const customers = getCustomers();
+        const products = getProducts();
+
+        // 分析所選客戶的訂單狀態
+        let purchasedOrdersInfo = [];
+        let pendingOrdersInfo = [];
+        let totalPurchasedCount = 0;
+
+        selectedCustomers.forEach((customerId) => {
+          const customerOrders = orders.filter(
+            (o) => o.customerId === customerId,
+          );
+          const customer = customers.find((c) => c.id === customerId);
+
+          const purchasedOrders = customerOrders.filter(
+            (o) => o.status === "purchased",
+          );
+          const pendingOrders = customerOrders.filter(
+            (o) => o.status === "pending",
+          );
+
+          if (purchasedOrders.length > 0) {
+            const productNames = purchasedOrders
+              .map((o) => {
+                const product = products.find((p) => p.id === o.productId);
+                return `${product?.name || "未知商品"} (${o.orderNumber})`;
+              })
+              .join("、");
+
+            purchasedOrdersInfo.push(`${customer?.name}: ${productNames}`);
+            totalPurchasedCount += purchasedOrders.length;
+          }
+
+          if (pendingOrders.length > 0) {
+            const productNames = pendingOrders
+              .map((o) => {
+                const product = products.find((p) => p.id === o.productId);
+                return product?.name || "未知商品";
+              })
+              .join("、");
+
+            pendingOrdersInfo.push(`${customer?.name}: ${productNames}`);
+          }
+        });
+
+        if (totalPurchasedCount === 0) {
+          alert("⚠️ 所選客戶中沒有「已採購」狀態的訂單可以出貨");
+          return;
+        }
+
+        // 顯示確認訊息
+        let confirmMessage = `📦 批量出貨確認\n\n`;
+        confirmMessage += `將為 ${selectedCustomers.size} 位客戶的 ${totalPurchasedCount} 筆「已採購」訂單標記為已完成：\n\n`;
+        confirmMessage += purchasedOrdersInfo
+          .map((info, idx) => `${idx + 1}. ${info}`)
+          .join("\n\n");
+
+        if (pendingOrdersInfo.length > 0) {
+          confirmMessage += `\n\n⚠️ 以下訂單仍為「待採購」狀態，將不會出貨：\n\n`;
+          confirmMessage += pendingOrdersInfo
+            .map((info, idx) => `${idx + 1}. ${info}`)
+            .join("\n");
+        }
+
+        confirmMessage += `\n\n確認要繼續出貨嗎？`;
+
+        if (!confirm(confirmMessage)) {
+          return;
+        }
+
+        // 執行批量出貨
+        orders.forEach((order) => {
+          if (
+            selectedCustomers.has(order.customerId) &&
+            order.status === "purchased"
+          ) {
+            order.status = "completed";
+          }
+        });
+
+        saveOrders(orders);
+        alert(
+          `✓ 批量出貨成功！\n\n已為 ${selectedCustomers.size} 位客戶的 ${totalPurchasedCount} 筆訂單標記為已完成`,
+        );
+
+        cancelBatchShip();
+        renderDashboard();
+      }
+
+      function cancelBatchShip() {
+        isBatchShipMode = false;
+        selectedCustomers.clear();
+        document.getElementById("batch-ship-toolbar").classList.add("hidden");
+        document.getElementById("batch-ship-btn").style.background = "#2B2B2B";
+        updateSelectedCount();
+        renderOrders();
+      }
+
+      // 複製客戶訂單資訊
+      function copyCustomerOrderInfo(customerId) {
+        const orders = getOrders();
+        const customers = getCustomers();
+        const products = getProducts();
+
+        const customer = customers.find((c) => c.id === customerId);
+        const customerOrders = orders.filter(
+          (o) => o.customerId === customerId && o.status === "completed",
+        );
+
+        if (customerOrders.length === 0) {
+          alert("⚠️ 此客戶沒有已完成的訂單");
+          return;
+        }
+
+        // 生成訂單資訊文字
+        let orderText = `📦 訂單出貨通知\n`;
+        orderText += `━━━━━━━━━━━━━━━\n\n`;
+        orderText += `👤 客戶：${customer?.name || "未知客戶"}\n`;
+        orderText += `📅 出貨日期：${new Date().toLocaleDateString("zh-TW")}\n\n`;
+        orderText += `🛍️ 商品清單：\n`;
+        orderText += `━━━━━━━━━━━━━━━\n`;
+
+        // 按商品分組（合併相同商品）
+        const productGroups = {};
+        customerOrders.forEach((order) => {
+          if (!productGroups[order.productId]) {
+            productGroups[order.productId] = {
+              quantity: 0,
+              totalAmount: 0,
+              orders: [],
+            };
+          }
+          productGroups[order.productId].quantity += order.quantity;
+          productGroups[order.productId].totalAmount += order.totalAmount;
+          productGroups[order.productId].orders.push(order);
+        });
+
+        let itemNumber = 1;
+        let totalAmount = 0;
+
+        Object.entries(productGroups).forEach(([productId, group]) => {
+          const product = products.find((p) => p.id === parseInt(productId));
+          orderText += `\n${itemNumber}. ${product?.name || "未知商品"}\n`;
+          orderText += `   數量：${group.quantity} 個\n`;
+          orderText += `   單價：$${product?.price || 0}\n`;
+          orderText += `   小計：$${group.totalAmount.toLocaleString()}\n`;
+
+          // 如果有多筆訂單，列出訂單編號
+          if (group.orders.length > 1) {
+            orderText += `   訂單：${group.orders.map((o) => o.orderNumber).join("、")}\n`;
+          }
+
+          totalAmount += group.totalAmount;
+          itemNumber++;
+        });
+
+        orderText += `\n━━━━━━━━━━━━━━━\n`;
+        orderText += `💰 總金額：NT$ ${totalAmount.toLocaleString()}\n`;
+        orderText += `━━━━━━━━━━━━━━━\n\n`;
+        orderText += `✅ 商品已為您準備完成！\n`;
+        orderText += `📮 請確認收件資訊，我們將盡快為您安排配送。\n\n`;
+        orderText += `感謝您的訂購！ 🙏`;
+
+        // 複製到剪貼簿
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(orderText)
+            .then(() => {
+              alert("✓ 訂單資訊已複製到剪貼簿！\n\n可以直接貼給客戶了 😊");
+            })
+            .catch((err) => {
+              // 如果 Clipboard API 失敗，使用備用方法
+              fallbackCopyToClipboard(orderText);
+            });
+        } else {
+          // 瀏覽器不支援 Clipboard API，使用備用方法
+          fallbackCopyToClipboard(orderText);
+        }
+      }
+
+      // 備用複製方法（適用於舊版瀏覽器）
+      function fallbackCopyToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+
+        try {
+          document.execCommand("copy");
+          alert("✓ 訂單資訊已複製到剪貼簿！\n\n可以直接貼給客戶了 😊");
+        } catch (err) {
+          alert("❌ 複製失敗，請手動複製以下內容：\n\n" + text);
+        }
+
+        document.body.removeChild(textArea);
+      }
+
+      // 客戶管理相關功能
+      function showAddCustomerModal() {
+        document.getElementById("customer-form").reset();
+        document.getElementById("customer-modal").classList.remove("hidden");
+      }
+
+      function closeCustomerModal() {
+        document.getElementById("customer-modal").classList.add("hidden");
+      }
+
+      function saveCustomer(event) {
+        event.preventDefault();
+
+        const customers = getCustomers();
+        const newId =
+          customers.length > 0
+            ? Math.max(...customers.map((c) => c.id)) + 1
+            : 1;
+
+        const newCustomer = {
+          id: newId,
+          name: document.getElementById("customer-name").value,
+          lineId: document.getElementById("customer-line-id").value,
+        };
+
+        customers.push(newCustomer);
+        saveCustomers(customers);
+
+        closeCustomerModal();
+        renderSimulate();
+        alert("✓ 測試客戶已新增！");
+      }
+
+      function deleteCustomer(id) {
+        if (
+          confirm(
+            "確定要刪除此測試客戶嗎？\n\n注意：如果有相關訂單，將無法刪除。",
+          )
+        ) {
+          const orders = getOrders();
+          const hasOrders = orders.some((o) => o.customerId === id);
+
+          if (hasOrders) {
+            alert("❌ 此客戶有相關訂單，無法刪除！\n\n請先刪除相關訂單。");
+            return;
+          }
+
+          const customers = getCustomers().filter((c) => c.id !== id);
+          saveCustomers(customers);
+          renderSimulate();
+          alert("✓ 測試客戶已刪除！");
+        }
+      }
+
+      // 初始化
+      initData();
+      renderDashboard();
+    </script>
+
+    <!-- 圖片放大彈窗 -->
+    <div
+      id="image-modal"
+      class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+      onclick="closeImageModal()"
+    >
+      <div class="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+        <img
+          id="modal-image"
+          src=""
+          alt="商品圖片"
+          class="max-w-full max-h-full object-contain rounded-lg"
+        />
+        <button
+          class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+          onclick="closeImageModal()"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function openImageModal(imageSrc) {
+        document.getElementById('modal-image').src = imageSrc;
+        document.getElementById('image-modal').classList.remove('hidden');
+      }
+
+      function closeImageModal() {
+        document.getElementById('image-modal').classList.add('hidden');
+      }
+    </script>
+  </body>
+</html>
