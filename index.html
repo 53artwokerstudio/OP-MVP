@@ -2217,6 +2217,8 @@ reader.readAsDataURL(file);
       }
 
       function showAddProductModal() {
+        document.getElementById("product-modal").classList.remove("hidden");
+        
         document.getElementById("modal-title").textContent = "新增商品";
         document.getElementById("product-form").reset();
         document.getElementById("product-id").value = "";
@@ -2224,10 +2226,9 @@ reader.readAsDataURL(file);
 
         // 設定匯率顯示和預覽
         const rate = getExchangeRate();
-        document.getElementById("modal-rate-display").textContent = rate;
+        document.getElementById("modal-rate-display").textContent = rate.toString();
         document.getElementById("product-price-twd-preview").textContent = "0";
 
-        document.getElementById("product-modal").classList.remove("hidden");
       }
 
       function editProduct(id) {
